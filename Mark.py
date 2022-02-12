@@ -2,6 +2,7 @@ import pyttsx3
 import speech_recognition as sr
 import webbrowser
 import wikipedia
+import pywhatkit
 import pyautogui
 import os
 import pyjokes
