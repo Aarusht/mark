@@ -1,3 +1,4 @@
+# importing libs
 import pyttsx3
 import speech_recognition as sr
 import webbrowser
@@ -9,9 +10,12 @@ import pyjokes
 from PyDictionary import PyDictionary as dicti
 import datetime
 from playsound import playsound as ps
+import time as TiMeSus
+from pywikihow import search_wikihow
+import requests
+from bs4 import BeautifulSoup as BS
 
-
-# os.startfile('.\\Mark.bat')
+# setting up voice engine
 engine = pyttsx3.init('sapi5') 
 voices = engine.getProperty('voices') 
 engine.setProperty('voices',voices[0].id)
@@ -21,12 +25,12 @@ def Say(Text):
     print("     ")
     print(f'Mark X: {Text}')
     engine.say(text=Text)#Says the text
-    engine.runAndWait()#Waits for code to end
+    engine.runAndWait()#Waits for code to end , or it will auto shutdown 
     print("     ")
 
 def Listen():
     # print('listening....')
-    r= sr.Recognizer()
+    r= sr.Recognizer() # building recognizer
     with sr.Microphone(0) as source: # Microphone(0) means the deafault mic
         r.pause_threshold = 1
         audio = r.listen(source,0 ,5) # Giving mic as source , then 
@@ -35,7 +39,7 @@ def Listen():
 
     try:
         # print('recognizing....')
-        query = r.recognize_google(audio,language='en-in')
+        query = r.recognize_google(audio,language='en-in') #sending audio file to google , google makes it text and saves the text in {query
         print(f'you: {query}')
     except Exception as Error:
         return ''
@@ -44,6 +48,7 @@ def Listen():
 
 def MainTasks():
     Say('Mark is online!!')
+    # a bunch of functions....
     def Music():
         Say("what is the name of the music")
         musicName = Listen()
@@ -136,7 +141,6 @@ def MainTasks():
             wiki = wikipedia.summary(query,2)
             Say(f'according to wikipidea:{wiki}')
         elif ('screenshot' in query):
-            pyautogui.hotkey('win','down')
             pyautogui.hotkey('win','shift','s')
         elif('open' in query):
             OpenApps(query)  
@@ -147,8 +151,6 @@ def MainTasks():
         elif('joke' in query):
             get = pyjokes.get_joke()
             Say(get)
-        elif('hello' in query):
-            Say('hello sir!')
         elif('where am i'in query):
             webbrowser.open('https://www.google.com/maps/')
         elif('meaning' in query):
@@ -179,19 +181,6 @@ def MainTasks():
 
             result = dicti.synonym(query)
             Say(f'the antonym of {query} is {result}')
-        elif('alarm' in query):
-            Say('enter the time (IN 24 hour)')
-            time = input('enter the time: ')
-
-            while True:
-                timeAc = datetime.datetime.now()
-                now = timeAc.strftime("%H:%M:%S")
-
-                if now == time:
-                    Say("alarm opening")
-                    ps(".\\ringtone.mp3")
-                elif now>time:
-                    break
         elif('new window' in query):
                 pyautogui.hotkey('ctrl','n')
         elif('new tab' in query):
@@ -208,4 +197,77 @@ def MainTasks():
                 pyautogui.press('k')
         elif('mute' in query or 'unmute' in query):
                 pyautogui.press('m')
+        elif('alarm' in query):
+            Say('enter the time (IN 24 hour)')
+            time = input('enter the time: ')
+
+            while True:
+                timeAc = datetime.datetime.now()
+                now = timeAc.strftime("%H:%M:%S")
+
+                if now == time:
+                    Say("alarm opening")
+                    ps(".\\ringtone.mp3")
+                elif now>time:
+                    break
+        elif('date'in query):
+            today = datetime.date.today()
+            day = today.strftime("%B %d, %Y")
+            Say(f"Today's date: {day}")
+        elif('time' in query):
+            now = datetime.datetime.now()
+            dt_string = now.strftime("%H:%M:%S")
+            Say(f"the time is: {dt_string}")
+        elif('how to'in query):
+            Say('Surfing the internet')
+            op = query.replace('Mark','')
+            op = query.replace('tell','')
+            op = query.replace('me','')
+            op = query.replace('how','')
+            op = query.replace('to','')
+            max_result = 1
+            how_to_func = search_wikihow(op , max_result)
+            assert len(how_to_func) == 1
+            Say(how_to_func[0].summary)
+        elif('what is'in query):
+            Say('Surfing the internet')
+            op = query.replace('Mark','')
+            op = query.replace('tell','')
+            op = query.replace('me','')
+            op = query.replace('what is','')
+            pywhatkit.search(op)
+        elif('who is'in query):
+            Say('Surfing the internet')
+            op = query.replace('Mark','')
+            op = query.replace('tell','')
+            op = query.replace('me','')
+            op = query.replace('who is','')
+            pywhatkit.search(op)           
+        elif('temperature' in query):
+            search =  'temperature'
+            url = f'https://www.google.com/search?q={search}'
+            r = requests.get(url)
+            data = BS(r.text , 'html.parser')
+            temp = data.find('div',class_ = 'BNeawe').text
+            Say(f'the temperature is {temp}')
+         elif('shutdown' in query):
+            #take input from user to confirm shutdown or not
+            Say('are you sure?')
+            choice = input("Shutdown your computer? ( y or n ) : ") 
+            if choice == "y" or choice == "Y":
+                os.system("shutdown /s /t  1") # 1 is time that is for after what time we want to shutdown 
+   
+            else:
+                Say('canceled')
+        elif('restart' in query):
+            #take input from user to confirm shutdown or not
+            Say('are you sure?')
+            choice = input("restart your computer? ( y or n ) : ") 
+            if choice == "y" or choice == "Y":
+                os.system("shutdown /r /t  1") # 1 is time that is for after what time we want to shutdown 
+   
+            else:
+                Say('canceled')
+        elif('logout' in query):
+            os.system("shutdown /l /t  1")  
 MainTasks()
